@@ -56,8 +56,10 @@ class MainMenu(QMainWindow):
         self.setStyleSheet("""
             * {
                 font-family: "Segoe UI";
+                color: #FFFFFF;
                 font-size: 18px;
                 background-color: #363636;
+                
             }
             QLabel {
                 font-size: 24px;

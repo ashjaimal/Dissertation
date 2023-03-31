@@ -80,6 +80,7 @@ class SettingsWindow(QMainWindow):
         self.setStyleSheet("""
             * {
                 font-family: "Segoe UI";
+                color: #FFFFFF;
                 font-size: 14px;
                 background-color: #363636;
             }
