@@ -3,11 +3,13 @@ from PyQt5.QtWidgets import QApplication, QMainWindow, QVBoxLayout, QHBoxLayout,
 from PyQt5.QtCore import Qt
 from SettingsWindow import SettingsWindow  # Make sure to create this file as per the provided instructions
 
+
 class MainMenu(QMainWindow):
     def __init__(self):
         super().__init__()
 
         self.settings_window = None
+        self.memory_game = None
 
         self.init_ui()
 
@@ -26,6 +28,7 @@ class MainMenu(QMainWindow):
         button_layout = QHBoxLayout()
 
         memory_button = QPushButton('Memory')
+        memory_button.clicked.connect(self.show_memory_game)
         button_layout.addWidget(memory_button)
 
         reaction_button = QPushButton('Reaction')
@@ -59,7 +62,7 @@ class MainMenu(QMainWindow):
                 color: #FFFFFF;
                 font-size: 18px;
                 background-color: #363636;
-                
+
             }
             QLabel {
                 font-size: 24px;
@@ -89,11 +92,22 @@ class MainMenu(QMainWindow):
         self.settings_window.show()
         self.hide()
 
+    def show_memory_game(self):
+        if hasattr(self, 'memory_game') and self.memory_game:
+            self.memory_game.show()
+        else:
+            from Memory.Memory import main as memory_game_main
+            self.memory_game = memory_game_main(self.show)
+        self.hide()
+
+
 def main():
     app = QApplication(sys.argv)
     main_menu = MainMenu()
     main_menu.show()
     sys.exit(app.exec_())
 
+
 if __name__ == '__main__':
     main()
+

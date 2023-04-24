@@ -3,13 +3,17 @@
 @Date: 27/11/21
 @About: Class to register for an account which stores it in a database
 '''
-
+import logging
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QComboBox, QDateEdit, QVBoxLayout, QWidget
 
 import sys
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QLineEdit, QPushButton, QComboBox, QDateEdit, QVBoxLayout, QWidget
 from PyQt5.QtCore import pyqtSignal
+import pyodbc
+from pathlib import Path
+sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
+from Menus.MainMenu import MainMenu
 
 class RegisterWindow(QMainWindow):
     back_signal = pyqtSignal()
@@ -72,15 +76,20 @@ class RegisterWindow(QMainWindow):
             * {
                 font-family: "Segoe UI";
                 font-size: 14px;
+                font-color: #FFFFFF;
+                background-color: #363636;
+
             }
             QLabel {
                 font-size: 18px;
                 font-weight: bold;
+                color: white;
             }
             QLineEdit, QComboBox, QDateEdit {
                 padding: 5px 10px;
                 border: 1px solid #cccccc;
                 border-radius: 5px;
+                color: white;
             }
             QPushButton {
                 background-color: #5c9efe;
@@ -88,6 +97,7 @@ class RegisterWindow(QMainWindow):
                 padding: 10px 20px;
                 border: 1px solid #5c9efe;
                 border-radius: 5px;
+                color: white;
             }
             QPushButton:hover {
                 background-color: #6eb5ff;
@@ -99,9 +109,32 @@ class RegisterWindow(QMainWindow):
             }
         """)
 
+    #logging.basicConfig(filename='user_management.log', level=logging.DEBUG,
+                      #  format='%(asctime)s - %(levelname)s - %(message)s')
+
+    #def register_user(username, password):
+      #  logging.info('Attempting to register user: %s', username)
+
+       # if registration_successful:
+        #    logging.info('User %s successfully registered.', username)
+       # else:
+            #logging.error('User registration failed for %s.', username)
+
     def handle_registration(self):
-        # Validate and store user data here
-        pass
+        cnxn = pyodbc.connect("Driver={SQL Server Native Client 11.0};"
+                              "Server=ASHWIN-DESKTOP\SQLEXPRESS;"
+                              "Database=Brainiac;"
+                              "Trusted_Connection=yes;")
+
+        cursor = cnxn.cursor()
+        cursor.execute(
+            """INSERT INTO [Brainiac].[dbo].[userAccount] ([email],[passwrd],[first_name],[last_name],[gender],[date_of_birth]) VALUES (?,?,?,?,?,?)""",
+            (self.email_input.text(), self.password_input.text(), self.first_name_input.text(), self.last_name_input.text(),
+             self.gender_input.currentText(), self.dob_input.date().toPyDate()))
+        cnxn.commit()
+        cursor.close()
+        cnxn.close()
+
 
 def main():
     app = QApplication(sys.argv)

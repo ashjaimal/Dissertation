@@ -1,82 +1,108 @@
 import sys
-import random
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QPushButton, QVBoxLayout, QWidget, QHBoxLayout, QMessageBox
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout, QWidget, QRadioButton, QPushButton, QHBoxLayout
 
-class LightSwitchPuzzle(QMainWindow):
-    def __init__(self, bulb_count=5):
+class DeductivePuzzleGame(QMainWindow):
+    def __init__(self, main_menu_callback=None):
         super().__init__()
-        self.bulb_count = bulb_count
+
+        self.main_menu_callback = main_menu_callback
+
         self.init_ui()
 
     def init_ui(self):
-        self.setWindowTitle('Light Switch Puzzle')
+        self.setWindowTitle('Deductive Puzzle Game')
+        self.setFixedSize(600, 600)
 
-        main_layout = QVBoxLayout()
+        layout = QVBoxLayout()
 
-        self.bulbs = [random.choice([True, False]) for _ in range(self.bulb_count)]
-        self.switch_buttons = []
+        self.clues_label = QLabel("1. Alice is not first.\n2. Bob is not last.\n3. Carol is in the middle.")
+        layout.addWidget(self.clues_label)
 
-        bulb_layout = QHBoxLayout()
-        for i in range(self.bulb_count):
-            bulb_button = QPushButton('💡' if self.bulbs[i] else '🔌')
-            bulb_button.setDisabled(True)
-            bulb_layout.addWidget(bulb_button)
+        self.options = {
+            "A": ["Alice", "Bob", "Carol"],
+            "B": ["Bob", "Alice", "Carol"],
+            "C": ["Carol", "Alice", "Bob"],
+            "D": ["Alice", "Carol", "Bob"]
+        }
 
-            switch_button = QPushButton('Toggle')
-            switch_button.clicked.connect(lambda _, idx=i: self.toggle(idx))
-            self.switch_buttons.append(switch_button)
+        self.radio_buttons = {}
+        for option, names in self.options.items():
+            radio_button = QRadioButton(f"{option}: {', '.join(names)}")
+            self.radio_buttons[option] = radio_button
+            layout.addWidget(radio_button)
 
-        main_layout.addLayout(bulb_layout)
+        self.submit_button = QPushButton("Submit")
+        self.submit_button.clicked.connect(self.check_answer)
+        layout.addWidget(self.submit_button)
 
-        switch_layout = QHBoxLayout()
-        for switch_button in self.switch_buttons:
-            switch_layout.addWidget(switch_button)
+        self.score_label = QLabel("Score: 0")
+        layout.addWidget(self.score_label)
 
-        main_layout.addLayout(switch_layout)
+        self.main_menu_button = QPushButton("Return to Main Menu")
+        self.main_menu_button.clicked.connect(self.return_to_main_menu)
+        layout.addWidget(self.main_menu_button)
 
         container = QWidget()
-        container.setLayout(main_layout)
+        container.setLayout(layout)
         self.setCentralWidget(container)
-
         self.setStyleSheet("""
-            * {
-                font-family: "Segoe UI";
-                font-size: 14px;
-            }
-            QLabel, QPushButton:disabled {
-                color: #555;
-            }
-            QPushButton {
-                background-color: #5c9efe;
-                color: white;
-                padding: 5px 20px;
-                border: 1px solid #5c9efe;
-                border-radius: 5px;
-            }
-            QPushButton:hover {
-                background-color: #6eb5ff;
-                border-color: #6eb5ff;
-            }
-            QPushButton:pressed {
-                background-color: #4a89dc;
-                border-color: #4a89dc;
-            }
-        """)
+                            * {
+                                font-family: "Segoe UI";
+                                font-size: 14px;
+                                background-color: #363636;
+                            }
+                            QLabel {
+                                font-size: 18px;
+                                font-weight: bold;
+                                color: white;
 
-    def toggle(self, idx):
-        for i in range(idx - 1, idx + 2):
-            if 0 <= i < self.bulb_count:
-                self.bulbs[i] = not self.bulbs[i]
-                self.switch_buttons[i].setText('💡' if self.bulbs[i] else '🔌')
+                            }
+                            QLineEdit {
+                                padding: 5px 10px;
+                                border: 1px solid #cccccc;
+                                border-radius: 5px;
+                                color: white;
 
-        if all(self.bulbs):
-            QMessageBox.information(self, 'Congratulations', 'You have turned on all the light bulbs!')
+                            }
+                            QPushButton {
+                                background-color: #E8175D;
+                                color: white;
+                                padding: 10px 20px;
+                                border: 1px solid #E8175D;
+                                border-radius: 5px;
+                            }
+                            QPushButton:hover {
+                                background-color: #CC527A;
+                                border-color: #CC527A;
+                            }
+                            QPushButton:pressed {
+                                background-color: #A8A7A7;
+                                border-color: #A8A7A7;
+                            }
+                        """)
+
+        self.score = 0
+
+    def check_answer(self):
+        correct_option = "B"
+        for option, radio_button in self.radio_buttons.items():
+            if radio_button.isChecked() and option == correct_option:
+                self.score += 1
+                self.score_label.setText(f"Score: {self.score}")
+                break
+
+    def return_to_main_menu(self):
+        if self.main_menu_callback:
+            self.main_menu_callback()
+            self.hide()
+
 
 def main():
     app = QApplication(sys.argv)
-    light_switch_puzzle = LightSwitchPuzzle()
-    light_switch_puzzle.show()
+    game = DeductivePuzzleGame()
+    game.show()
     sys.exit(app.exec_())
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     main()
